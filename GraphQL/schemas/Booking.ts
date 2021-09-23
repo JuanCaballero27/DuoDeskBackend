@@ -1,6 +1,6 @@
-const { gql } = require('apollo-server-core')
+import { gql } from 'apollo-server-core'
 
-const Booking = gql`
+export const Booking = gql`
     type Interval{
         startDate: String!
         endDate: String!
@@ -10,8 +10,8 @@ const Booking = gql`
         status:  String!
         #! TODO: Change this for Date Type
         expirationDate: String!
-        price:  Number!
-        total:  Number!
+        price:  Float!
+        total:  Float!
         currency:  String!
     }
 
@@ -26,5 +26,3 @@ const Booking = gql`
         interval: Interval!
     }
 `
-
-module.exports = Booking

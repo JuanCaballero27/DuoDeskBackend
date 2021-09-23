@@ -18,4 +18,4 @@ const typeDefs = [
     Review,
 ]
 
-module.exports = typeDefs
+export default typeDefs

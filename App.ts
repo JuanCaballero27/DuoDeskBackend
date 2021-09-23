@@ -2,6 +2,10 @@ import express, {Request, Response} from 'express'
 import passport from 'passport'
 import session from 'express-session'
 
+import cors from 'cors'
+import csurf from 'csurf'
+import bodyParser from 'body-parser'
+
 import config from './utils/config'
 import connectToDatabase from './utils/dbconnect'
 
@@ -27,6 +31,8 @@ const isLogged = (request: ApiRequest, response: Response, next: Function): void
     request.user ? next() : response.status(401).send('Unauthorized')
 }
 
+app.use(cors())
+// app.use(csurf())
 app.use(session({ secret: 'cats' }))
 app.use(passport.initialize())
 app.use(passport.session())

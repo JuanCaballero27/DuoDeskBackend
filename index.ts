@@ -1,14 +1,15 @@
-const {ApolloServer} = require('apollo-server-express')
+import {ApolloServer} from 'apollo-server-express'
 import { ApolloServerPluginDrainHttpServer } from 'apollo-server-core'
 import http from 'http'
-import { resolve } from 'path/posix'
+
 import app from './App'
-import typeDefs from './GraphQL/typeDefs'
 
-const resolvers = {}
+import typeDefs from './GraphQL/schemas'
+
 type typeDefs = any[]
+const resolvers = {}
 
-const startApolloServer = async (typeDefs: typeDefs, resolvers: object) => {
+const startApolloServer = async (typeDefs: typeDefs, resolvers: {}) => {
     const httpServer = http.createServer(app);
     const server = new ApolloServer({
       typeDefs,

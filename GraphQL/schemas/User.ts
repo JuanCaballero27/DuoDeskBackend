@@ -1,6 +1,6 @@
-const { gql } = require('apollo-server-core')
+import { gql } from 'apollo-server-core'
 
-const User = gql`
+export const User = gql`
     type Country{
         name: String
         code: String
@@ -25,5 +25,3 @@ const User = gql`
         favoriteOffices: [Office]!
     }
 `
-
-module.exports = User

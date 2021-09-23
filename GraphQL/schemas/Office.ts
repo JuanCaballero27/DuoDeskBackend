@@ -1,6 +1,6 @@
-const { gql } = require('apollo-server-core')
+import { gql } from 'apollo-server-core'
 
-const Office = gql`
+export const Office = gql`
     type Location{
         description: String
         # coordinates: {
@@ -53,7 +53,7 @@ const Office = gql`
         day: String!
         isAvailable: Boolean!
         startHour: String
-        startHour: String
+        endHour: String
     }
 
     type Office{
@@ -71,5 +71,3 @@ const Office = gql`
         daysForCancellation: Int
     }
 `
-
-module.exports = Office
