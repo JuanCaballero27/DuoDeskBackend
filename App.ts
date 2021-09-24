@@ -4,8 +4,8 @@ import session from 'express-session'
 
 import cors from 'cors'
 import csurf from 'csurf'
-import bodyParser from 'body-parser'
 import cookieSession from 'cookie-session'
+import cookieParser from 'cookie-parser'
 
 import { isAuth } from './middleware/authMiddleware'
 
@@ -29,7 +29,7 @@ interface ApiRequest extends Request{
     user?: any,
     session: any,
 }
-
+app.use(cookieParser())
 app.use(cookieSession({
     name: 'session',
     keys: ['Hello', 'World'],
@@ -76,8 +76,8 @@ app.get('/reject', (request: ApiRequest, response: any) => {
     response.json({error: 'Something went wrong'})
 })
 
-app.get('/acept', (request: Request, response: Response) => {
-    console.log(request.session);
+app.get(('/acept'), (request: Request, response: Response) => {
+    console.log(request.user);
     response.json(request.user)
 })
 

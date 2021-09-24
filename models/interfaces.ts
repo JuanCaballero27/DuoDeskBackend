@@ -21,17 +21,19 @@ export interface IBooking{
 }
 
 export interface IUser{
+    provider?: string,
     email: string,
     typeEmail: string | undefined,
     firstName: string,
     lastName: string,
     password: string | undefined,
     image: string,
-    country: {
+    country?: {
         name: string
         code: string
     }
     birthDate: Date,
+    createdDate: Date,
     extraInfo: [{
         field: string,
         value: string | number | boolean 

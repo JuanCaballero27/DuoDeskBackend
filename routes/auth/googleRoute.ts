@@ -20,7 +20,6 @@ googleRoute.get('/callback', (request: Request, response: Response, next: NextFu
                     console.log(error);
                     return next(error)
                 }
-                response.cookie('Session Google Cookie', 'Luis es gay')
                 response.redirect('http://localhost:3000')
             })
         }
