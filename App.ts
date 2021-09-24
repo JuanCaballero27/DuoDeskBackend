@@ -36,8 +36,9 @@ app.use(cookieSession({
     maxAge: 9999999*99999999*9999999
 }))
 app.use(cors({
+    origin: 'http://localhost:3000',
+    allowedHeaders: 'http://localhost:3000',
     credentials: true,
-    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
 }))
 // app.use(csurf())
 app.use(session({ secret: 'cats' }))
@@ -75,9 +76,14 @@ app.get('/reject', (request: ApiRequest, response: any) => {
     response.json({error: 'Something went wrong'})
 })
 
-app.get('/acept', (request: ApiRequest, response: Response) => {
-    console.log(request.user);
-    response.send(`Hello ${request.user.displayName}`)
+app.get('/acept', (request: Request, response: Response) => {
+    console.log(request.session);
+    response.json(request.user)
+})
+
+app.get('/prueba', (request: Request, response: Response) => {
+    console.log(request.session);
+    response.cookie('Prueba', 'Cookies', {httpOnly: true}).redirect('http://localhost:3000')
 })
 
 export default app
