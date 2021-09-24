@@ -28,4 +28,4 @@ userSchema.set('toJSON', {
     }
 })
 
-module.exports = model<IUser>('User', userSchema)
+export default model<IUser>('User', userSchema)

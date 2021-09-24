@@ -5,6 +5,9 @@ import session from 'express-session'
 import cors from 'cors'
 import csurf from 'csurf'
 import bodyParser from 'body-parser'
+import cookieSession from 'cookie-session'
+
+import { isAuth } from './middleware/authMiddleware'
 
 import config from './utils/config'
 import connectToDatabase from './utils/dbconnect'
@@ -27,17 +30,28 @@ interface ApiRequest extends Request{
     session: any,
 }
 
-const isLogged = (request: ApiRequest, response: Response, next: Function): void => {
-    request.user ? next() : response.status(401).send('Unauthorized')
-}
-
-app.use(cors())
+app.use(cookieSession({
+    name: 'session',
+    keys: ['Hello', 'World'],
+    maxAge: 9999999*99999999*9999999
+}))
+app.use(cors({
+    credentials: true,
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+}))
 // app.use(csurf())
 app.use(session({ secret: 'cats' }))
 app.use(passport.initialize())
 app.use(passport.session())
 
 connectToDatabase(URI)
+
+app.use('/google', googleRoute)
+app.use('/facebook', facebookRoute)
+app.use('/microsoft', microsoftRoute)
+app.use('/twitter', twitterRoute)
+
+app.use(isAuth)
 
 app.get('/', (req: any, res: any) => {
     res.send(`
@@ -50,10 +64,6 @@ app.get('/', (req: any, res: any) => {
 })
 
 
-app.use('/google', googleRoute)
-app.use('/facebook', facebookRoute)
-app.use('/microsoft', microsoftRoute)
-app.use('/twitter', twitterRoute)
 
 app.get('/logout', (request: ApiRequest, response: any) => {
     request.logout()
@@ -65,8 +75,8 @@ app.get('/reject', (request: ApiRequest, response: any) => {
     response.json({error: 'Something went wrong'})
 })
 
-app.get('/acept', isLogged, (request: ApiRequest, response: Response) => {
-    console.log(request.user)
+app.get('/acept', (request: ApiRequest, response: Response) => {
+    console.log(request.user);
     response.send(`Hello ${request.user.displayName}`)
 })
 

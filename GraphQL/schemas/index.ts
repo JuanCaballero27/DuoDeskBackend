@@ -1,8 +1,8 @@
-const { User } = require('./User')
-const { Office } = require('./Office')
-const { Booking } = require('./Booking')
-const { Review } = require('./Review')
-const { gql } = require('apollo-server-core')
+import { gql } from'apollo-server-core'
+import { User } from './User'
+import { Office } from './Office'
+import { Booking } from './Booking'
+import { Review } from './Review'
 
 const Query = gql`
     type Query{
