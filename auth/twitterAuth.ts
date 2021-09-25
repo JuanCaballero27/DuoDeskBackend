@@ -3,19 +3,18 @@ import { Strategy as TwitterStrategy} from 'passport-twitter'
 import User from '../models/User'
 import { parseName } from '../utils/functions'
 
-const TWITTER_CONSUMER_KEY = "A5NFiwm1gnqIBzPvLYieYnetw"
-const TWITTER_CONSUMER_SECRET = "EwWzRePqLX7gDLtsz4MPmdCtqlBZ95iny46NnNE0PdwKjYxczI"
+const TWITTER_CONSUMER_KEY = "cAckKJu07i0OsBvH45k7gcqA0"
+const TWITTER_CONSUMER_SECRET = "gFBewiawjO6KTqLCGtMvmuvsSnqC0ae7LAIzZLPKXTyAAOJHgn"
 
 passport.use(new TwitterStrategy({
     consumerKey: TWITTER_CONSUMER_KEY,
     consumerSecret: TWITTER_CONSUMER_SECRET,
     callbackURL: "http://localhost:5000/twitter/callback",
-    passReqToCallback: true,
     includeEmail: true,
-    includeEntities: true,
-    includeStatus: true,
-    },
-    (request:any, accessToken:any, refreshToken:any, profile: any, done: (err: any, user: any) => any) => {
+    userProfileURL: "https://api.twitter.com/1.1/account/verify_credentials.json?include_email=true",
+    
+},
+    (accessToken:any, refreshToken:any, profile: any, done: (error: any, user: any) => any) => {
         User.findOne({email: profile.email}, async (error:any, user:any) => {
             if(error){
                 return done(error, false)

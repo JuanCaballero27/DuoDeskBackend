@@ -15,12 +15,14 @@ import connectToDatabase from './utils/dbconnect'
 import './auth/googleAuth'
 import './auth/facebookAuth'
 import './auth/microsoftAuth'
-import './auth/twitterAuth'
+// import './auth/twitterAuth'
+import './auth/localAuth'
 
 import googleRoute from './routes/auth/googleRoute'
 import facebookRoute from './routes/auth/facebookRoute'
 import microsoftRoute from './routes/auth/microsoftRoute'
-import twitterRoute from './routes/auth/twitterRoute'
+// import twitterRoute from './routes/auth/twitterRoute'
+import localRouter from './routes/auth/localRoute'
 
 const app = express()
 const URI = config.MONGODB_URI
@@ -29,6 +31,9 @@ interface ApiRequest extends Request{
     user?: any,
     session: any,
 }
+
+app.use(express.json())
+app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cookieSession({
     name: 'session',
@@ -41,7 +46,7 @@ app.use(cors({
     credentials: true,
 }))
 // app.use(csurf())
-app.use(session({ secret: 'cats' }))
+app.use(session({ secret: 'cats', cookie: {secure: false}}))
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -50,7 +55,8 @@ connectToDatabase(URI)
 app.use('/google', googleRoute)
 app.use('/facebook', facebookRoute)
 app.use('/microsoft', microsoftRoute)
-app.use('/twitter', twitterRoute)
+// app.use('/twitter', twitterRoute)
+app.use('/auth', localRouter)
 
 app.use(isAuth)
 
