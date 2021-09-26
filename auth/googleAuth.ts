@@ -28,10 +28,10 @@ passport.use(new GoogleStrategy({
                     image: profile.picture,
                 })
                 await newUser.save()
-                return done(null, profile)
+                return done(null, newUser)
             }
             else{
-                return done(null, profile)        
+                return done(null, user)        
             }
         })
     }

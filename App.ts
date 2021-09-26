@@ -27,23 +27,19 @@ import localRouter from './routes/auth/localRoute'
 const app = express()
 const URI = config.MONGODB_URI
 
-interface ApiRequest extends Request{
-    user?: any,
-    session: any,
-}
 
 app.use(express.json())
+app.use(cors({
+    origin: 'http://localhost:3000',
+    allowedHeaders: 'http://localhost:3000',
+    credentials: true,
+}))
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cookieSession({
     name: 'session',
     keys: ['Hello', 'World'],
     maxAge: 9999999*99999999*9999999
-}))
-app.use(cors({
-    origin: 'http://localhost:3000',
-    allowedHeaders: 'http://localhost:3000',
-    credentials: true,
 }))
 // app.use(csurf())
 app.use(session({ secret: 'cats', cookie: {secure: false}}))
@@ -55,8 +51,12 @@ connectToDatabase(URI)
 app.use('/google', googleRoute)
 app.use('/facebook', facebookRoute)
 app.use('/microsoft', microsoftRoute)
-// app.use('/twitter', twitterRoute)
 app.use('/auth', localRouter)
+
+app.get('/logout', (request: Request, response: any) => {
+    request.logOut()
+    response.status(200).send('Logged Out')
+})
 
 app.use(isAuth)
 
@@ -70,19 +70,7 @@ app.get('/', (req: any, res: any) => {
     `)
 })
 
-
-
-app.get('/logout', (request: ApiRequest, response: any) => {
-    request.logout()
-    request.session.destroy()
-    response.send('Bye Friend')
-})
-
-app.get('/reject', (request: ApiRequest, response: any) => {
-    response.json({error: 'Something went wrong'})
-})
-
-app.get(('/acept'), (request: Request, response: Response) => {
+app.get(('/user/account'), (request: Request, response: Response) => {
     console.log(request.user);
     response.json(request.user)
 })

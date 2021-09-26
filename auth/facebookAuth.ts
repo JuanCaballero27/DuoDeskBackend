@@ -35,10 +35,10 @@ passport.use(new FacebookStrategy({
                     image: profile._json.picture.data.url,
                 })
                 await newUser.save()
-                return done(null, profile)
+                return done(null, newUser)
             }
             else{
-                return done(null, profile)        
+                return done(null, user)        
             }
         })
     }

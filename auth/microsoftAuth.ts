@@ -18,20 +18,27 @@ passport.use(new MicrosoftStrategy({
                 return done(error, false)
             }
             else if(!user){
+                console.log(profile)
                 const newUser = new User({
                     provider: profile.provider,
                     email: profile._json.mail,
-                    typeEmail: profile.emails.find((email:any) => {
-                        return profile._json.mail === email.value
-                    })["type"],
                     firstName: profile.name.givenName,
                     lastName: profile.name.familyName,
                 })
+                if(profile.emails.length === 1){
+                    newUser.email = profile.emails[0].value
+                    newUser.typeEmail = profile.emails[0].type
+                }
+                else{
+                    newUser.typeEmail= profile.emails.find((email:any) => {
+                        return profile._json.mail === email.value
+                    })["type"]
+                }
                 await newUser.save()
-                return done(null, profile)
+                return done(null, newUser)
             }
             else{
-                return done(null, profile)        
+                return done(null, user)        
             }
         })
     }

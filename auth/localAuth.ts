@@ -7,9 +7,10 @@ passport.use(new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password',
+        passReqToCallback: true,
     },
-    function(username, password, done) {
-        User.findOne({ email: username }, async (err: any, user: any) => {
+    function(request, username, password, done) {
+        User.findOne({ email: username, provider: 'local' }, async (err: any, user: any) => {
             if (err) { 
                 return done(err, false)
             }

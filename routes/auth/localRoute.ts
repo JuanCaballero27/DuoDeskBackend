@@ -17,14 +17,17 @@ localRouter.post('/login', (request: Request, response: Response, next: NextFunc
                     console.log(error);
                     return next(error)
                 }
-                response.send("Logged")
-                // response.redirect('http://localhost:3000')
+                response.redirect('http://localhost:3000')
             })
         }
     })(request, response, next)
 })
 
 localRouter.post('/signup', (request: Request, response: Response) => {
+    response.setHeader("Access-Control-Allow-Origin", "*");
+    response.setHeader("Access-Control-Allow-Credentials", "true");
+    response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
     User.findOne({email: request.body.email}, async (error: any, user: any) => {
         if(error){
             response.status(500).send(error)
@@ -53,6 +56,11 @@ localRouter.post('/signup', (request: Request, response: Response) => {
             }
         }
     })
+})
+
+localRouter.get('/signup', (request: Request, response: Response) => {
+    console.log(request.get('origin'))
+    response.send("Hello world")
 })
 
 export default localRouter
