@@ -7,12 +7,12 @@ passport.use(new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password',
-        passReqToCallback: true,
     },
-    function(request, username, password, done) {
-        User.findOne({ email: username, provider: 'local' }, async (err: any, user: any) => {
-            if (err) { 
-                return done(err, false)
+    (username, password, done) => {
+        User.findOne({email: username, provider: "local"}, async (error: any, user: any) => {
+            console.log(username)
+            if (error) { 
+                return done(error, false)
             }
             if (!user) {
                 return done(null, false, {message: 'There is not such user'}) 

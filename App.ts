@@ -1,4 +1,4 @@
-import express, {Request, Response} from 'express'
+import express, {NextFunction, Request, Response} from 'express'
 import passport from 'passport'
 import session from 'express-session'
 
@@ -29,11 +29,13 @@ const URI = config.MONGODB_URI
 
 
 app.use(express.json())
-app.use(cors({
-    origin: 'http://localhost:3000',
-    allowedHeaders: 'http://localhost:3000',
-    credentials: true,
-}))
+app.use(cors(), (request: Request, response: Response, next: NextFunction) => {
+    response.setHeader("Access-Control-Allow-Origin", "http://localhost:3000")
+    response.setHeader("Access-Control-Allow-Credentials", "true");
+    response.setHeader("Access-Control-Allow-Methods", "GET,HEAD,OPTIONS,POST,PUT");
+    response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
+    next()
+})
 app.use(express.urlencoded({extended: true}))
 app.use(cookieParser())
 app.use(cookieSession({
@@ -71,7 +73,7 @@ app.get('/', (req: any, res: any) => {
 })
 
 app.get(('/user/account'), (request: Request, response: Response) => {
-    console.log(request.user);
+    console.log(request.user)
     response.json(request.user)
 })
 

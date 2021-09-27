@@ -13,7 +13,6 @@ const userSchema = new Schema<IUser>({
         name: {type: String},
         code: {type: String},
     },
-    birthDate: {type: Date},
     createdDate: {type: Date, default: new Date(Date.now())},
     extraInfo: [{
         field: String,
