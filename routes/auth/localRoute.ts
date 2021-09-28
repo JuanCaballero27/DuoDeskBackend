@@ -14,16 +14,18 @@ localRouter.post('/login', (request: Request, response: Response, next: NextFunc
         if(user){
             request.logIn(user, (error) => {
                 if(error){
-                    response.send(error)
                     return next(error)
                 }
                 const cookies = request.cookies
-                response.cookie("session", cookies.session, {httpOnly: false})
-                response.cookie("session.sig", cookies["session.sig"], {httpOnly: false})
-                response.send(user)
+                // response.writeHead(200, {
+                //     'Set-Cookie': `session=${cookies.session}; session.sig=${cookies["sessiong.sig"]}`
+                // }).send()
+                response.json(user)
             })
         }
-        response.send(info)
+        else{
+            response.send(info)
+        }
     })(request, response, next)
 })
 
