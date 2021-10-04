@@ -1,6 +1,7 @@
-import express, {NextFunction, Request, Response} from 'express'
+import express, { NextFunction, request, Request, Response } from 'express'
 import passport from 'passport'
 import session from 'express-session'
+import multer from 'multer'
 
 import cors from 'cors'
 import csurf from 'csurf'
@@ -24,8 +25,23 @@ import microsoftRoute from './routes/auth/microsoftRoute'
 // import twitterRoute from './routes/auth/twitterRoute'
 import localRouter from './routes/auth/localRoute'
 
+import officesRouter from './routes/offices/offices'
+
 const app = express()
 const URI = config.MONGODB_URI
+
+// const storage = multer.diskStorage({
+//     destination: (request: Request, file, done) => {
+//         done(null, 'public/uploads')
+//     },
+//     filename: (request: Request, file, done) => {
+//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
+//         done(null, file.fieldname + '-' + uniqueSuffix)
+//     }
+// })
+
+// const upload = multer({ storage ,dest: __dirname + '/public/uploads/', limits: { fieldSize: 2 * 1024 * 1024 } });
+// const type = upload.any()
 
 
 app.use(express.json())
@@ -36,15 +52,15 @@ app.use(cors(), (request: Request, response: Response, next: NextFunction) => {
     response.setHeader("Access-Control-Allow-Headers", "Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers");
     next()
 })
-app.use(express.urlencoded({extended: true}))
+app.use(express.urlencoded({ extended: true }))
 app.use(cookieParser())
 app.use(cookieSession({
     name: 'session',
     keys: ['Hello', 'World'],
-    maxAge: 9999999*99999999*9999999
+    maxAge: 9999999 * 99999999 * 9999999
 }))
 // app.use(csurf())
-app.use(session({ secret: 'cats', cookie: {secure: false}}))
+app.use(session({ secret: 'cats', cookie: { secure: false } }))
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -54,6 +70,7 @@ app.use('/google', googleRoute)
 app.use('/facebook', facebookRoute)
 app.use('/microsoft', microsoftRoute)
 app.use('/auth', localRouter)
+app.use('/offices', officesRouter)
 
 app.get('/logout', (request: Request, response: any) => {
     request.logOut()
@@ -79,7 +96,7 @@ app.get(('/user/account'), (request: Request, response: Response) => {
 
 app.get('/prueba', (request: Request, response: Response) => {
     console.log(request.session);
-    response.cookie('Prueba', 'Cookies', {httpOnly: true}).redirect('http://localhost:3000')
+    response.cookie('Prueba', 'Cookies', { httpOnly: true }).redirect('http://localhost:3000')
 })
 
 export default app
