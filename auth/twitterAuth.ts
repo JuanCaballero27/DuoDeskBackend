@@ -29,10 +29,10 @@ passport.use(new TwitterStrategy({
                     image: profile._json.profile_image_url_https,
                 })
                 await newUser.save()
-                return done(null, profile)
+                return done(null, newUser)
             }
             else{
-                return done(null, profile)        
+                return done(null, user)        
             }
         })
     }

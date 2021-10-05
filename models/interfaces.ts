@@ -46,53 +46,33 @@ export interface IOffice{
     description: string,
     host: PopulatedDoc<IUser & Document>,
     isActive: boolean,
-    spaces: [{
-        name: string,
+    generalAmenities: string[]
+    spaces: {
+        nameSpace: string,
         typeSpace: string,
-        people: number,
-        description: string,
-        priceHour: number,
-        priceDay: number,
-        priceWeek: number,
-        currency: string,
-        availability: number,
-        amenities: [{
-            amenity: string,
-            description: string
-        }]
-    }],
-    address: {
-        street: string,
-        city: string,
-        state: string,
-        country: string,
-        countryCode: string,
-        zip: string,
-        location: {
-            description: string,
-            coordinates: {
-                latitude: number,
-                longitude: number,
-            },
-            isExact: boolean
-        }
-    },
-    scores: {
+        capacitySpace: number,
+        availableSpace: number,
+        hourPrice: number,
+        dayPrice: number,
+        weekPrice: number,
+        monthPrice: number,
+        nameAmenities: string[],
+        imagesUrls: string[]
+    }[],
+    address: any,
+    scores?: {
         averageScore: number,
         reviews: PopulatedDoc<IReview & Document>
     },
-    mainImage: string,
-    images: [{
-            url: string,
-            description: string,
-    }],
     days: [{
         day: string,
         isAvailable: boolean,
-        startHour: string,
-        endHour: string
+        startHour?: string,
+        endHour?: string
     }],
-    daysForCancellation: number,
+    notifications: string[],
+    official: string[],
+    openDate: string
 }
 
 
