@@ -57,7 +57,8 @@ export interface IOffice{
         weekPrice: number,
         monthPrice: number,
         nameAmenities: string[],
-        imagesUrls: string[]
+        imagesUrls: string[],
+        booking?: PopulatedDoc<IBooking & Document>[]
     }[],
     address: any,
     scores?: {

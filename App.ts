@@ -60,7 +60,6 @@ app.use(cookieSession({
     maxAge: 9999999 * 99999999 * 9999999
 }))
 // app.use(csurf())
-app.use(session({ secret: 'cats', cookie: { secure: false } }))
 app.use(passport.initialize())
 app.use(passport.session())
 
@@ -76,6 +75,7 @@ app.get('/logout', (request: Request, response: any) => {
     response.status(200).send('Logged Out')
 })
 
+app.use('/offices', officesRouter)
 app.use(isAuth)
 
 app.get('/', (req: any, res: any) => {
@@ -93,7 +93,6 @@ app.get(('/user/account'), (request: Request, response: Response) => {
     response.json(request.user)
 })
 
-app.use('/offices', officesRouter)
 
 app.get('/prueba', (request: Request, response: Response) => {
     console.log(request.session);
