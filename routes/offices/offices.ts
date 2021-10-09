@@ -29,17 +29,25 @@ const type = upload.any()
 
 officesRouter.get('/', async (request: express.Request, response: express.Response) => {
     try {
-        const query: any = {isActive: true}
+        const query = Office.find()
         if(request.query.city){
-            query.address = {
-                $or: [{short_name: request.query.city}, {long_name: request.query.city}],
-                types: {$elemMatch: ['locality', 'political']}
-            }
+            query.setQuery({'address.address_components': 
+                {$elemMatch: {
+                    "types": ['locality', 'political'],
+                    'short_name': request.query.city,
+                    'long_name': request.query.city,
+                }}
+            })
         }
-        console.log(query)
-        const result = await Office.find(query)
-        response.json(result)
+        query.exec((error, docs) => {
+            console.log(docs.length)
+            if(error){
+                response.status(500).send(error)
+            }
+            response.json(docs)
+        })
     } catch (error) {
+        console.log(error)
         // response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
         response.status(500).send(error)
     }
@@ -51,6 +59,7 @@ officesRouter.post('/', type, async (request: express.Request, response: express
         const data = JSON.parse(JSON.stringify(request.body))
         data.location = JSON.parse(data.location)
         data.spaces = JSON.parse(data.spaces)
+        const user: any = request.user
         if (data.spaces.length !== 1 && typeof data.spaces !== "object") {
             data.spaces = data.spaces.map((element: any) => {
                 const { spaceImages, ...rest } = JSON.parse(element)
@@ -61,6 +70,7 @@ officesRouter.post('/', type, async (request: express.Request, response: express
         }
         const newOffice = new Office({
             name: data.title,
+            host: user.id || user._id,
             description: data.description,
             address: data.location,
             spaces: data.spaces,
@@ -112,7 +122,6 @@ officesRouter.post('/', type, async (request: express.Request, response: express
             console.log(error)
             response.send("Re mal mrk")
         }
-
     }
     catch(error){
         response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')

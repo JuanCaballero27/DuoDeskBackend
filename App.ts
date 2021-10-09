@@ -30,19 +30,6 @@ import officesRouter from './routes/offices/offices'
 const app = express()
 const URI = config.MONGODB_URI
 
-// const storage = multer.diskStorage({
-//     destination: (request: Request, file, done) => {
-//         done(null, 'public/uploads')
-//     },
-//     filename: (request: Request, file, done) => {
-//         const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9)
-//         done(null, file.fieldname + '-' + uniqueSuffix)
-//     }
-// })
-
-// const upload = multer({ storage ,dest: __dirname + '/public/uploads/', limits: { fieldSize: 2 * 1024 * 1024 } });
-// const type = upload.any()
-
 app.use(express.static('public'))
 app.use(express.json())
 app.use(cors(), (request: Request, response: Response, next: NextFunction) => {
