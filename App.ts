@@ -63,6 +63,7 @@ app.get('/logout', (request: Request, response: any) => {
 })
 
 app.use('/offices', officesRouter)
+
 app.use(isAuth)
 
 app.get('/', (req: any, res: any) => {

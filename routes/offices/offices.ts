@@ -3,6 +3,7 @@ import multer from 'multer'
 import fs from 'fs'
 
 import Office from '../../models/Office'
+import { isAuth } from '../../middleware/authMiddleware'
 
 const officesRouter = express.Router()
 
@@ -33,7 +34,7 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
         if(request.query.city){
             query.setQuery({'address.address_components': 
                 {$elemMatch: {
-                    "types": ['locality', 'political'],
+                    "types": { $in: ['political']},
                     'short_name': request.query.city,
                     'long_name': request.query.city,
                 }}
@@ -54,13 +55,14 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
 })
 
 
-officesRouter.post('/', type, async (request: express.Request, response: express.Response) => {
+officesRouter.post('/', type, isAuth,async (request: express.Request, response: express.Response) => {
     try {
         const data = JSON.parse(JSON.stringify(request.body))
         data.location = JSON.parse(data.location)
-        data.spaces = JSON.parse(data.spaces)
         const user: any = request.user
-        if (data.spaces.length !== 1 && typeof data.spaces !== "object") {
+        console.log(data.spaces.length)
+        console.log(typeof data.spaces)
+        if (data.spaces.length !== 1 && Array.isArray(data.spaces)) {
             data.spaces = data.spaces.map((element: any) => {
                 const { spaceImages, ...rest } = JSON.parse(element)
                 console.log(JSON.parse(element))
@@ -68,6 +70,7 @@ officesRouter.post('/', type, async (request: express.Request, response: express
                 return JSON.parse(element)
             })
         }
+
         const newOffice = new Office({
             name: data.title,
             host: user.id || user._id,
@@ -124,6 +127,7 @@ officesRouter.post('/', type, async (request: express.Request, response: express
         }
     }
     catch(error){
+        console.log(error)
         response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
     }
 })
