@@ -54,6 +54,18 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
     }
 })
 
+officesRouter.get('/:id', async(request: express.Request, response: express.Response) => {
+    try{
+        const { id } = request.params
+        const office = await Office.findById(id)
+        if(office){
+            response.status(200).json(office)
+        }
+    }
+    catch(error){
+        response.status(500).send(error)
+    }
+})
 
 officesRouter.post('/', type, isAuth,async (request: express.Request, response: express.Response) => {
     try {
