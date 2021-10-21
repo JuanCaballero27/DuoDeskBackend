@@ -1,6 +1,6 @@
 import express from "express"
 import multer from 'multer'
-import fs from 'fs'
+import fs, { open } from 'fs'
 
 import Office from '../../models/Office'
 import { isAuth } from '../../middleware/authMiddleware'
@@ -31,21 +31,34 @@ const type = upload.any()
 officesRouter.get('/', async (request: express.Request, response: express.Response) => {
     try {
         const query = Office.find()
-        if(request.query.city){
-            query.setQuery({'address.address_components': 
-                {$elemMatch: {
-                    "types": { $in: ['political']},
-                    'short_name': request.query.city,
-                    'long_name': request.query.city,
-                }}
+        if (request.query.city) {
+            query.setQuery({
+                'address.address_components':
+                {
+                    $elemMatch: {
+                        "types": { $in: ['political'] },
+                        'short_name': request.query.city,
+                        'long_name': request.query.city,
+                    }
+                }
             })
         }
-        query.exec((error, docs) => {
-            console.log(docs.length)
-            if(error){
+        query.populate('host').exec((error, docs) => {
+            let finalDocs = docs
+            if (error) {
                 response.status(500).send(error)
             }
-            response.json(docs)
+            if(request.query.date){
+                const compareDate = new Date(request.query.date.toString())
+                finalDocs = finalDocs.filter((office) => {
+                    const openDate = new Date(office.openDate)
+                    if(+compareDate >= +openDate){
+                        return true
+                    }
+                    return false
+                })
+            }
+            response.json(finalDocs)
         })
     } catch (error) {
         console.log(error)
@@ -54,20 +67,20 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
     }
 })
 
-officesRouter.get('/:id', async(request: express.Request, response: express.Response) => {
-    try{
+officesRouter.get('/:id', async (request: express.Request, response: express.Response) => {
+    try {
         const { id } = request.params
         const office = await Office.findById(id)
-        if(office){
+        if (office) {
             response.status(200).json(office)
         }
     }
-    catch(error){
+    catch (error) {
         response.status(500).send(error)
     }
 })
 
-officesRouter.post('/', type, isAuth,async (request: express.Request, response: express.Response) => {
+officesRouter.post('/', type, isAuth, async (request: express.Request, response: express.Response) => {
     try {
         const data = JSON.parse(JSON.stringify(request.body))
         data.location = JSON.parse(data.location)
@@ -138,7 +151,7 @@ officesRouter.post('/', type, isAuth,async (request: express.Request, response: 
             response.send("Re mal mrk")
         }
     }
-    catch(error){
+    catch (error) {
         console.log(error)
         response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
     }
