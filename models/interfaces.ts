@@ -1,26 +1,6 @@
 import { Document, PopulatedDoc } from 'mongoose'
 
-
-export interface IBooking{
-    idOffice: PopulatedDoc<IOffice & Document>,
-    idHost: PopulatedDoc<IUser & Document>,
-    idUser: PopulatedDoc<IUser & Document>,
-    nameSpace: string,
-    created: Date,
-    transaction: {
-        status: string,
-        expirationDate: Date,
-        price: number,
-        total: number,
-        currency: string,
-    },
-    interval: {
-        startDate: Date
-        endDate: Date
-    }
-}
-
-export interface IUser{
+export interface IUser {
     provider?: string,
     email: string,
     typeEmail: string | undefined,
@@ -36,12 +16,25 @@ export interface IUser{
     createdDate: Date,
     extraInfo: [{
         field: string,
-        value: string | number | boolean 
+        value: string | number | boolean
     }]
-    favoritesOffices: [PopulatedDoc<IOffice & Document>]
+    favoritesOffices: PopulatedDoc<IOffice & Document>[],
+    bookings?: {
+        idHost: PopulatedDoc<IUser & Document>,
+        idUser: PopulatedDoc<IUser & Document>,
+        idOffice: PopulatedDoc<IOffice & Document>,
+        idTransaction?: string,
+        startDate: string,
+        endDate: string,
+        people: number,
+        priceSubtotal: number,
+        priceTotal: number,
+        dateReservation: number | Date,
+        state: string
+    }[]
 }
 
-export interface IOffice{
+export interface IOffice {
     name: string,
     description: string,
     host: PopulatedDoc<IUser & Document>,
@@ -58,7 +51,19 @@ export interface IOffice{
         monthPrice: number,
         nameAmenities: string[],
         imagesUrls: string[],
-        booking?: PopulatedDoc<IBooking & Document>[]
+        bookings?: {
+            idHost: PopulatedDoc<IUser & Document>,
+            idUser: PopulatedDoc<IUser & Document>,
+            idOffice: PopulatedDoc<IOffice & Document>,
+            idTransaction?: string,
+            startDate: string,
+            endDate: string,
+            people: number,
+            priceSubtotal: number,
+            priceTotal: number,
+            dateReservation: number | Date,
+            state: string
+        }[]
     }[],
     address: any,
     scores?: {
@@ -77,7 +82,7 @@ export interface IOffice{
 }
 
 
-export interface IReview{
+export interface IReview {
     idOffice: PopulatedDoc<IOffice & Document>,
     idUser: PopulatedDoc<IUser & Document>,
     comments: [{

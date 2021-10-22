@@ -44,25 +44,72 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
             })
         }
         query.populate('host').exec((error, docs) => {
-            let finalDocs = docs
             if (error) {
                 response.status(500).send(error)
             }
-            if(request.query.date){
-                const compareDate = new Date(request.query.date.toString())
-                finalDocs = finalDocs.filter((office) => {
-                    const openDate = new Date(office.openDate)
-                    if(+compareDate >= +openDate){
+            let finalDocs = docs
+            finalDocs = finalDocs.filter((element) => {
+                element.spaces = element.spaces.filter((space) => {
+                    if (space.typeSpace === request.query.type) {
                         return true
                     }
                     return false
                 })
+                if (element.spaces.length > 0) {
+                    return true
+                }
+                return false
+            })
+            if (request.query.date && request.query.people) {
+                const compareDate = new Date(request.query.date.toString())
+                finalDocs = finalDocs.filter((office) => {
+                    const openDate = new Date(office.openDate)
+                    console.log(+compareDate >= +openDate)
+                    if (+compareDate >= +openDate) {
+                        office.spaces = office.spaces.filter((space) => {
+                            if (["Oficina privada", "Sala de conferencias"].includes(space.typeSpace)) {
+                                if (space.bookings && space.bookings?.length > 0) {
+                                    return false
+                                }
+                                return true
+                            }
+                            else if (["Escritorio personal", "Espacio abierto"].includes(space.typeSpace)) {
+                                if (space.bookings && space.bookings?.length > 0) {
+                                    let full = 0
+                                    let available = 0
+                                    for (let booking of space.bookings) {
+                                        full += booking.people
+                                        const bookingStartDate = new Date(booking.startDate)
+                                        const bookingEndDate = new Date(booking.endDate)
+                                        if (+bookingEndDate < +compareDate || +bookingStartDate > +compareDate) {
+                                            available++
+                                        }
+                                    }
+                                    if (full < space.capacitySpace && (space.capacitySpace - full) < Number(request.query.people) && available > 0) {
+                                        return true
+                                    }
+                                    else {
+                                        return false
+                                    }
+                                }
+                                else {
+                                    return true
+                                }
+                            }
+                        })
+                        if (office.spaces.length > 0) {
+                            return true
+                        }
+                    }
+                    return false
+                })
+                response.json(finalDocs)
             }
-            response.json(finalDocs)
+            else {
+                response.json(finalDocs)
+            }
         })
     } catch (error) {
-        console.log(error)
-        // response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
         response.status(500).send(error)
     }
 })
@@ -85,13 +132,9 @@ officesRouter.post('/', type, isAuth, async (request: express.Request, response:
         const data = JSON.parse(JSON.stringify(request.body))
         data.location = JSON.parse(data.location)
         const user: any = request.user
-        console.log(data.spaces.length)
-        console.log(typeof data.spaces)
         if (data.spaces.length !== 1 && Array.isArray(data.spaces)) {
             data.spaces = data.spaces.map((element: any) => {
                 const { spaceImages, ...rest } = JSON.parse(element)
-                console.log(JSON.parse(element))
-                console.log(rest)
                 return JSON.parse(element)
             })
         }
@@ -134,25 +177,20 @@ officesRouter.post('/', type, isAuth, async (request: express.Request, response:
         }
 
         try {
-            console.log(JSON.stringify(newOffice))
         }
         catch (error) {
-            console.log(newOffice)
         }
         finally {
-            console.log('Antes del registro :0')
         }
 
         try {
             const res = await newOffice.save()
             response.status(201).json(res)
         } catch (error) {
-            console.log(error)
             response.send("Re mal mrk")
         }
     }
     catch (error) {
-        console.log(error)
         response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
     }
 })

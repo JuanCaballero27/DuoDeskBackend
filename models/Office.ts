@@ -17,7 +17,20 @@ const officeSchema = new Schema<IOffice>({
         weekPrice: { type: Number },
         monthPrice: { type: Number },
         nameAmenities: [{ type: String }],
-        imagesUrls: [{ type: String }]
+        imagesUrls: [{ type: String }],
+        bookings: [{
+            idHost:  { type: Schema.Types.ObjectId, ref: 'User' },
+            idUser:  { type: Schema.Types.ObjectId, ref: 'User' },
+            idOffice:  { type: Schema.Types.ObjectId, ref: 'Office' },
+            idTransaction: { type: String },
+            startDate: { type: String },
+            endDate: { type: String },
+            people: { type: Number },
+            priceSubtotal: { type: Number },
+            pricesTotal: { type: Number },
+            dateReservation: { type: Number },
+            state: { type: String }
+        }]
     }],
     address: {},
     scores: {
