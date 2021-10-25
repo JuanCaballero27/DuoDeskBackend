@@ -48,18 +48,20 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
                 response.status(500).send(error)
             }
             let finalDocs = docs
-            finalDocs = finalDocs.filter((element) => {
-                element.spaces = element.spaces.filter((space) => {
-                    if (space.typeSpace === request.query.type) {
+            if(request.query.type){
+                finalDocs = finalDocs.filter((element) => {
+                    element.spaces = element.spaces.filter((space) => {
+                        if (space.typeSpace === request.query.type) {
+                            return true
+                        }
+                        return false
+                    })
+                    if (element.spaces.length > 0) {
                         return true
                     }
                     return false
                 })
-                if (element.spaces.length > 0) {
-                    return true
-                }
-                return false
-            })
+            }
             if (request.query.date && request.query.people) {
                 const compareDate = new Date(request.query.date.toString())
                 finalDocs = finalDocs.filter((office) => {
@@ -106,6 +108,7 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
                 response.json(finalDocs)
             }
             else {
+                console.log(finalDocs)
                 response.json(finalDocs)
             }
         })
