@@ -7,35 +7,30 @@ passport.use(new LocalStrategy(
     {
         usernameField: 'email',
         passwordField: 'password',
+        passReqToCallback: true,
     },
-    (username, password, done) => {
-        User.findOne({email: username, provider: "local"}, async (error: any, user: any) => {
-            console.log(username)
+    (request, username, password, done) => {
+        User.findOne({email: request.body.email, provider: "local"}, async (error: any, user: any) => {
             if (error) { 
                 return done(error, false)
             }
             if (!user) {
                 return done(null, false, {message: 'There is not such user'}) 
             }
-            const verification = await verifyPassword(password, user.password) 
+            const verification = await verifyPassword(request.body.password, user.password) 
             if (!verification) { 
-                return done(null, false, {
-                    message: `Authentication failled:
-                    ---------------------------------
-                    user password: ${user.password}
-                    in Password: ${password}
-                    verification: ${verification}`
-                }) 
+                return done(null, false) 
             }
-            return done(null, user);
+            return done(null, user)
         });
     }
 ))
 
-passport.serializeUser((user: any, done: (error: null, profile: any) => void) => {
+passport.serializeUser((user, done: (error: null, profile: any) => void) => {
     done(null, user)
 })
 
 passport.deserializeUser((user: any, done: (error: null, profile: any) => void) => {
+    console.log('SERIALIZE', User)
     done(null, user)
 })

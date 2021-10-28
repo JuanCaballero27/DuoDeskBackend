@@ -28,8 +28,9 @@ const officeSchema = new Schema<IOffice>({
             people: { type: Number },
             priceSubtotal: { type: Number },
             pricesTotal: { type: Number },
-            dateReservation: { type: Number },
-            state: { type: String }
+            dateReservation: { type: Number, default: Date.now() },
+            state: { type: String },
+            isActive: { type: Boolean, default: true}
         }]
     }],
     address: {},

@@ -62,7 +62,8 @@ export interface IOffice {
             priceSubtotal: number,
             priceTotal: number,
             dateReservation: number | Date,
-            state: string
+            state: string,
+            isActive: boolean
         }[]
     }[],
     address: any,

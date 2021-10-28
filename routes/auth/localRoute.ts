@@ -1,43 +1,35 @@
-import express, { Request, Response, NextFunction, request } from 'express'
+import express, { Request, Response, NextFunction, request, response } from 'express'
 import passport, { session } from 'passport'
 import { encryptPassword } from '../../utils/functions'
 import User from '../../models/User'
 
 const localRouter = express.Router()
 
-localRouter.post('/login', (request: Request, response: Response, next: NextFunction) => {
-    passport.authenticate('local', (error, user, info) => {
-        if(error){
-            response.send(error)
-            return next(error)
-        }
-        if(user){
-            request.logIn(user, (error) => {
-                if(error){
-                    return next(error)
-                }
-                const cookies = request.cookies
-                // response.writeHead(200, {
-                //     'Set-Cookie': `session=${cookies.session}; session.sig=${cookies["sessiong.sig"]}`
-                // }).send()
-                response.json(user)
+localRouter.post('/login', (request: Request, response: Response, next: express.NextFunction) => {
+    passport.authenticate('local', { session: true }, (error, user, info) => {
+        if (error) response.status(500).send(error)
+        if (!user) response.status(400).send('There is not such user')
+        else {
+            request.login(user, (error) => {
+                console.log('LOGIN USER', user)
+                if (error) return response.status(500).send(error)
+                console.log('FINAL USER', request.user)
+                return response.json(request.user)
             })
-        }
-        else{
-            response.send(info)
+            console.log('REQUEST USER', request.user)
         }
     })(request, response, next)
 })
 
 localRouter.post('/signup', (request: Request, response: Response) => {
-    User.findOne({email: request.body.email, provider: 'local'}, async (error: any, user: any) => {
-        if(error){
+    User.findOne({ email: request.body.email, provider: 'local' }, async (error: any, user: any) => {
+        if (error) {
             response.status(500).send(error)
         }
-        if(user){
-           response.status(400).send('The user already existis') 
+        if (user) {
+            response.status(400).send('The user already existis')
         }
-        else{
+        else {
             try {
                 const newUser = new User({
                     provider: 'local',
