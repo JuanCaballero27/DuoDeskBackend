@@ -22,7 +22,6 @@ import './auth/localAuth'
 import googleRoute from './routes/auth/googleRoute'
 import facebookRoute from './routes/auth/facebookRoute'
 import microsoftRoute from './routes/auth/microsoftRoute'
-// import twitterRoute from './routes/auth/twitterRoute'
 import localRouter from './routes/auth/localRoute'
 
 import officesRouter from './routes/offices/offices'

@@ -27,6 +27,9 @@ userSchema.set('toJSON', {
         returnedDocument.id = returnedDocument._id.toString()
         delete returnedDocument._id
         delete returnedDocument._v
+        if(returnedDocument.password){
+            delete returnedDocument.password
+        }
     }
 })
 

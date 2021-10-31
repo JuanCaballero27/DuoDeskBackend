@@ -1,32 +1,39 @@
 import express from "express"
 import multer from 'multer'
-import fs, { open } from 'fs'
+import fs from 'fs'
+import mongoose, { mongo } from 'mongoose'
+
+import dotenv from 'dotenv'
+dotenv.config()
+
+import { v2 as cloudinary } from 'cloudinary'
 
 import Office from '../../models/Office'
 import { isAuth } from '../../middleware/authMiddleware'
 
 const officesRouter = express.Router()
 
+cloudinary.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+})
+
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const url = file.fieldname.split('-', 3)
-        const dir = `./public/uploads/offices/${url[0]}/${url[1]}/`
-        if (!fs.existsSync(dir)) {
-            fs.mkdirSync(dir, { recursive: true })
-        }
+        const dir = `./public/uploads/offices/`
+        if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true })
         cb(null, dir)
     },
-    filename: (req, file, cb) => {
-        cb(null, file.originalname.toString().toLowerCase()
-            .replace(/\s+/g, '')
-            .replace(/[^\w\-]^.+/g, '')
-            .replace(/\-\-+/g, '')
-            .replace(/^-+/, '')
-            .replace(/-+$/, ''))
-    }
+    filename: (req, file, cb) => cb(null, file.originalname.toString().toLowerCase()
+        .replace(/\s+/g, '')
+        .replace(/[^\w\-]^.+/g, '')
+        .replace(/\-\-+/g, '')
+        .replace(/^-+/, '')
+        .replace(/-+$/, ''))
 })
-const upload = multer({ storage: storage })
-const type = upload.any()
+const uploader = multer({ storage })
+
 
 officesRouter.get('/', async (request: express.Request, response: express.Response) => {
     try {
@@ -48,7 +55,7 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
                 response.status(500).send(error)
             }
             let finalDocs = docs
-            if(request.query.type){
+            if (request.query.type) {
                 finalDocs = finalDocs.filter((element) => {
                     element.spaces = element.spaces.filter((space) => {
                         if (space.typeSpace === request.query.type) {
@@ -117,10 +124,16 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
     }
 })
 
+officesRouter.get('/user', isAuth, async (request: express.Request, response: express.Response) => {
+    const user = JSON.parse(JSON.stringify(request.user))
+    const offices = await Office.find({ host: new mongoose.Types.ObjectId(user.id) })
+    return response.status(200).json(offices)
+})
+
 officesRouter.get('/:id', async (request: express.Request, response: express.Response) => {
     try {
         const { id } = request.params
-        const office = await Office.findById(id)
+        const office = await Office.findById(id).populate('host')
         if (office) {
             response.status(200).json(office)
         }
@@ -130,7 +143,7 @@ officesRouter.get('/:id', async (request: express.Request, response: express.Res
     }
 })
 
-officesRouter.post('/', type, isAuth, async (request: express.Request, response: express.Response) => {
+officesRouter.post('/', uploader.any(), isAuth, async (request: express.Request, response: express.Response) => {
     try {
         const data = JSON.parse(JSON.stringify(request.body))
         data.location = JSON.parse(data.location)
@@ -141,7 +154,9 @@ officesRouter.post('/', type, isAuth, async (request: express.Request, response:
                 return JSON.parse(element)
             })
         }
-
+        else {
+            data.spaces = JSON.parse(data.spaces)
+        }
         const newOffice = new Office({
             name: data.title,
             host: user.id || user._id,
@@ -154,6 +169,32 @@ officesRouter.post('/', type, isAuth, async (request: express.Request, response:
             generalAmenities: data.generalAmenities.split(','),
             days: []
         })
+
+        for (let space of newOffice.spaces) {
+            space.imagesUrls = []
+        }
+
+        if (request.files) {
+            for (let image of JSON.parse(JSON.stringify(request.files))) {
+                const url = image.originalname.split('-', 2)
+                const cloudinaryPath = url[0] + '/' + url[1]
+                const result = await cloudinary.uploader.upload(image.path, { public_id: cloudinaryPath + image.originalname.split('-', 3) + String(Date.now())}).catch((error) => {
+                    fs.unlinkSync(image.path)
+                    return response.status(500).send(error)
+                })
+                if (result) {
+                    fs.unlinkSync(image.path)
+                    newOffice.spaces = newOffice.spaces.map((element) => {
+                        if (element.nameSpace.replace(/\s/g, '').toLowerCase() === url[1]) {
+                            console.log(JSON.parse(JSON.stringify(result)).secure_url)
+                            element.imagesUrls = [...element.imagesUrls, JSON.parse(JSON.stringify(result)).secure_url]
+                        }
+                        return element
+                    })
+
+                }
+            }
+        }
         newOffice.days.push({
             day: 'Week',
             isAvailable: true,
@@ -179,23 +220,122 @@ officesRouter.post('/', type, isAuth, async (request: express.Request, response:
             })
         }
 
-        try {
-        }
-        catch (error) {
-        }
-        finally {
-        }
-
+        console.log(request.files?.length)
         try {
             const res = await newOffice.save()
             response.status(201).json(res)
         } catch (error) {
-            response.send("Re mal mrk")
+            response.send(error)
         }
     }
     catch (error) {
         response.status(500).send('Ha sucedido un error. Lo sentimos mucho. Intentalo más tarde o reportalo')
     }
+})
+
+officesRouter.put('/', isAuth, uploader.any(), ( request: express.Request, response: express.Response) => {
+    console.log(request.body)
+    console.log(request.files)
+    console.log('------------')
+})
+
+officesRouter.put('/toggle', isAuth, async (request: express.Request, response: express.Response) => {
+    try {
+        const user = JSON.parse(JSON.stringify(request.user))
+        const office = await Office.findOne({
+            host: new mongoose.Types.ObjectId(user.id),
+            _id: new mongoose.Types.ObjectId(request.body.office)
+        })
+        if (office && office.spaces) {
+            if (request.body.space) {
+                if (office.isActive) {
+                    office.spaces = office.spaces.map((space) => {
+                        if (space.nameSpace === request.body.space) {
+                            space.isActive = !space.isActive
+                        }
+                        return space
+                    })
+                }
+                else {
+                    return response.status(400).json({
+                        error: 'Solicitud erronea',
+                        message: 'El estado de un espacio solo puede ser alterado sí la oficina está activa'
+                    })
+                }
+            }
+            else {
+                office.isActive = !office.isActive
+                for (let space of office.spaces) {
+                    space.isActive = office.isActive
+                }
+            }
+            await office.save()
+            return response.status(201).json({
+                error: null,
+                message: 'Estado actualizado correctamente'
+            })
+        }
+        else {
+            return response.status(404).json({
+                error: 'No encontrado',
+                message: 'No se ha encontrado la oficina'
+            })
+        }
+    }
+    catch (error) {
+        response.status(500).send(error)
+    }
+})
+
+officesRouter.delete('/:office', isAuth, async (request: express.Request, response: express.Response) => {
+    const { office } = request.params
+    const mongoOffice = await Office.findById(office)
+    if (mongoOffice) {
+        const id = JSON.parse(JSON.stringify(request.user)).id
+        if (id !== mongoOffice.host.toString()) {
+            return response.status(401).json({
+                error: 'Sin autorización',
+                message: 'Usuario no autorizado'
+            })
+        }
+        await mongoOffice.delete()
+        return response.status(200).json({
+            error: null,
+            message: 'Oficina eliminada correctamente'
+        })
+    }
+
+})
+
+officesRouter.delete('/:office/:space', isAuth, async (request: express.Request, response: express.Response) => {
+    const { office, space } = request.params
+    const mongoOffice = await Office.findById(office)
+    if (mongoOffice) {
+        const id = JSON.parse(JSON.stringify(request.user)).id
+        if (id !== mongoOffice.host.toString()) {
+            return response.status(401).json({
+                error: 'Sin autorización',
+                message: 'Usuario no autorizado'
+            })
+        }
+        if (mongoOffice.spaces.length > 1) {
+            mongoOffice.spaces = mongoOffice.spaces.filter((element) => {
+                return element.nameSpace !== space
+            })
+            await mongoOffice.save()
+        }
+        else {
+            await mongoOffice.delete()
+        }
+        return response.status(200).json({
+            error: null,
+            message: 'Espacio eliminado correctamente'
+        })
+    }
+    return response.status(404).json({
+        error: null,
+        message: 'Oficina no encontrada'
+    })
 })
 
 export default officesRouter

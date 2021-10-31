@@ -18,6 +18,7 @@ const officeSchema = new Schema<IOffice>({
         monthPrice: { type: Number },
         nameAmenities: [{ type: String }],
         imagesUrls: [{ type: String }],
+        isActive: { type: Boolean, default: true},
         bookings: [{
             idHost:  { type: Schema.Types.ObjectId, ref: 'User' },
             idUser:  { type: Schema.Types.ObjectId, ref: 'User' },

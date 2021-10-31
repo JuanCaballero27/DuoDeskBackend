@@ -51,6 +51,7 @@ export interface IOffice {
         monthPrice: number,
         nameAmenities: string[],
         imagesUrls: string[],
+        isActive: boolean,
         bookings?: {
             idHost: PopulatedDoc<IUser & Document>,
             idUser: PopulatedDoc<IUser & Document>,

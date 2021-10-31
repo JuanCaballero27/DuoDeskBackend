@@ -29,6 +29,7 @@ passport.use(new MicrosoftStrategy({
                     email: profile._json.mail,
                     firstName: profile.name.givenName,
                     lastName: profile.name.familyName,
+                    image: `https://avatars.dicebear.com/api/open-peeps/${(profile._json.mail + profile.name.givenName).replaceAll(/\s/g,'')}.svg?face=smileBig`
                 })
                 if (profile.emails.length === 1) {
                     newUser.email = profile.emails[0].value

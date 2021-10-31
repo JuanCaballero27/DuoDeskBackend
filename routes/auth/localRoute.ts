@@ -8,15 +8,12 @@ const localRouter = express.Router()
 localRouter.post('/login', (request: Request, response: Response, next: express.NextFunction) => {
     passport.authenticate('local', { session: true }, (error, user, info) => {
         if (error) response.status(500).send(error)
-        if (!user) response.status(400).send('There is not such user')
+        if (!user) response.status(404).send('No existe dicho usuario')
         else {
             request.login(user, (error) => {
-                console.log('LOGIN USER', user)
                 if (error) return response.status(500).send(error)
-                console.log('FINAL USER', request.user)
                 return response.json(request.user)
             })
-            console.log('REQUEST USER', request.user)
         }
     })(request, response, next)
 })
@@ -27,7 +24,10 @@ localRouter.post('/signup', (request: Request, response: Response) => {
             response.status(500).send(error)
         }
         if (user) {
-            response.status(400).send('The user already existis')
+            response.status(400).json({
+                status: 400,
+                message: 'Ya existe un usuario con dicho Email'
+            })
         }
         else {
             try {
@@ -36,7 +36,8 @@ localRouter.post('/signup', (request: Request, response: Response) => {
                     email: request.body.email,
                     firstName: request.body.firstName,
                     lastName: request.body.lastName,
-                    birthDate: new Date(Number(request.body.birthDate) * 1000)
+                    birthDate: new Date(Number(request.body.birthDate) * 1000),
+                    image: `https://avatars.dicebear.com/api/open-peeps/${request.body.email}.svg?face=smileBig`
                 })
                 const password = await encryptPassword(request.body.password)
                 newUser.password = password
