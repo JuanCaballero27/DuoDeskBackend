@@ -2,8 +2,11 @@ import passport from 'passport'
 import { Strategy as FacebookStrategy } from 'passport-facebook'
 import User from '../models/User'
 
-const FACEBOOK_APP_ID = "394186002113536"
-const FACEBOOK_APP_SECRET = "c862b1d523e14741aeeae8ee98e19722"
+import dotenv from 'dotenv'
+dotenv.config()
+
+const FACEBOOK_APP_ID = process.env.FACEBOOK_APP_ID || ''
+const FACEBOOK_APP_SECRET = process.env.FACEBOOK_APP_SECRET || ''
 
 passport.use(new FacebookStrategy({
     clientID: FACEBOOK_APP_ID,

@@ -50,9 +50,4 @@ localRouter.post('/signup', (request: Request, response: Response) => {
     })
 })
 
-localRouter.get('/signup', (request: Request, response: Response) => {
-    console.log(request.get('origin'))
-    response.send("Hello world")
-})
-
 export default localRouter

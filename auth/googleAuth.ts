@@ -2,8 +2,11 @@ import passport from 'passport'
 import { Strategy as GoogleStrategy } from 'passport-google-oauth2'
 import User from '../models/User'
 
-const GOOGLE_CLIENT_ID = '1091858905525-dnaq3u772ks6e3dc98c0guggp5t42lcj.apps.googleusercontent.com'
-const GOOGLE_CLIENT_SECRET = 'oWk5-J5dnD4-JAlBpKAOcA3p'
+import dotenv from 'dotenv'
+dotenv.config()
+
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || ''
+const GOOGLE_CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET || ''
 
 passport.use(new GoogleStrategy({
     clientID: GOOGLE_CLIENT_ID,
@@ -13,7 +16,6 @@ passport.use(new GoogleStrategy({
 },
     (request: any, accessToken: any, refreshToken: any, profile: any, done: (err: any, user: any) => any) => {
         User.findOne({ email: profile.email, provider: 'google' }, async (error: any, user: any) => {
-            console.log('GOOGLE USER', user)
             if (error) {
                 return done(error, false)
             }

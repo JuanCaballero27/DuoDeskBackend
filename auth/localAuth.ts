@@ -31,6 +31,5 @@ passport.serializeUser((user, done: (error: null, profile: any) => void) => {
 })
 
 passport.deserializeUser((user: any, done: (error: null, profile: any) => void) => {
-    console.log('SERIALIZE', User)
     done(null, user)
 })

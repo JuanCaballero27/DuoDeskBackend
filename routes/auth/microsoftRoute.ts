@@ -6,14 +6,12 @@ const microsoftRoute = express.Router()
 microsoftRoute.get('/auth', passport.authenticate('microsoft'))
 microsoftRoute.get('/callback', (request: Request, response: Response, next: NextFunction) => {
     passport.authenticate('microsoft', (error, user, info) => {
-        console.log("CallBack!!");
         if(error){
             return next(error)
         }
         if(user){
             request.logIn(user, (error) => {
                 if(error){
-                    console.log(error);
                     return next(error)
                 }
                 response.redirect('http://localhost:3000')

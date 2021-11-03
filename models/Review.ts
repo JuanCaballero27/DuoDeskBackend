@@ -7,7 +7,6 @@ const reviewSchema = new Schema<IReview>({
     comments: [{
         comment: {type: String},
         score: {type: Number, min: 1, max: 5},
-        rentedOffice: {type: Boolean},
         created: {type: Date, default: Date.now()}
     }]
 })

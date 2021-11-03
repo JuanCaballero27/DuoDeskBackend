@@ -90,7 +90,6 @@ export interface IReview {
     comments: [{
         comment: string,
         score: number,
-        rentedOffice: boolean,
         created: Date
     }]
 }

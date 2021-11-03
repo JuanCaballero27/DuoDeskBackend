@@ -2,8 +2,11 @@ import passport from 'passport'
 import { Strategy as MicrosoftStrategy } from 'passport-microsoft'
 import User from '../models/User'
 
-const MICROSOFT_CLIENT_ID = "541e8840-28fe-4bef-ab3f-835689067bd6"
-const MICROSOFT_CLIENT_SECRET = "CJ~7Q~B.3m1jfV9VyWCbbxR7XTJsLAWjY.ojD"
+import dotenv from 'dotenv'
+dotenv.config()
+
+const MICROSOFT_CLIENT_ID = process.env.MICROSOFT_CLIENT_ID || ''
+const MICROSOFT_CLIENT_SECRET = process.env.MICROSOFT_CLIENT_SECRET || ''
 
 passport.use(new MicrosoftStrategy({
     clientID: MICROSOFT_CLIENT_ID,
@@ -14,16 +17,10 @@ passport.use(new MicrosoftStrategy({
 },
     (request: any, accessToken: any, refreshToken: any, profile: any, done: (err: any, user: any) => any) => {
         User.findOne({ provider: 'microsoft', email: profile._json.userPrincipalName }, async (error: any, user: any) => {
-            console.log('MICRO USER', user)
-            console.log('PROFILE EMAIL', profile.email)
-            console.log('JSON PROFILE EMAIL', profile._json.mail)
-            console.log('REQUEST BODY', request.body)
-            console.log('PROFILE', profile)
             if (error) {
                 return done(error, false)
             }
             else if (!user) {
-                console.log(profile)
                 const newUser = new User({
                     provider: profile.provider,
                     email: profile._json.mail,
