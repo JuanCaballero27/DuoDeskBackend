@@ -64,7 +64,7 @@ officesRouter.get('/', async (request: express.Request, response: express.Respon
                         return false
                     })
                     if (element.spaces.length > 0) {
-                        if(element.isActive){
+                        if (element.isActive) {
                             return true
                         }
                         return false
@@ -136,7 +136,42 @@ officesRouter.get('/:id', async (request: express.Request, response: express.Res
         const { id } = request.params
         const office = await Office.findById(id).populate('host')
         if (office) {
-            response.status(200).json(office)
+            let finalDoc = office
+            if (request.query.date && request.query.people) {
+                const compareDate = new Date(request.query.date.toString())
+                const openDate = new Date(office.openDate)
+                finalDoc.spaces = finalDoc.spaces.map((space) => {
+                    if (space.isActive) {
+                        if (["Oficina privada", "Sala de conferencias"].includes(space.typeSpace)) {
+                            if (space.bookings && space.bookings?.length > 0) {
+                                space.isActive = false
+                            }
+                        }
+                        else if (["Escritorio personal", "Espacio abierto"].includes(space.typeSpace)) {
+                            if (space.bookings && space.bookings?.length > 0) {
+                                let full = 0
+                                let available = 0
+                                for (let booking of space.bookings) {
+                                    full += booking.people
+                                    const bookingStartDate = new Date(booking.startDate)
+                                    const bookingEndDate = new Date(booking.endDate)
+                                    if (+bookingEndDate < +compareDate || +bookingStartDate > +compareDate) {
+                                        available++
+                                    }
+                                }
+                                if (!(full < space.capacitySpace && (space.capacitySpace - full) < Number(request.query.people) && available > 0)) {
+                                    space.isActive = false
+                                }
+                            }
+                        }
+                    }
+                    return space
+                })
+            }
+            response.status(200).json(finalDoc)
+        }
+        else{
+            response.status(404).send('Not Found')
         }
     }
     catch (error) {
